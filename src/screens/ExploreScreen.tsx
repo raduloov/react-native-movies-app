@@ -8,12 +8,13 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { baseUrl, key } from '../api/themoviesdb';
-import MovieCard from '../components/MovieCard';
+import { ExploreStackNavProps } from '../types/ExploreParamList';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Searchbar } from 'react-native-paper';
+import MovieCard from '../components/MovieCard';
 import CategoryItem from '../components/CategoryItem';
 
-const ExploreScreen = ({ navigation }) => {
+const ExploreScreen = ({ navigation }: ExploreStackNavProps<'Explore'>) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [movies, setMovies] = useState<any>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Popular');
@@ -37,7 +38,7 @@ const ExploreScreen = ({ navigation }) => {
   );
 
   useEffect(() => {
-    getMovies('top_rated');
+    getMovies('popular');
   }, [getMovies]);
 
   return (
