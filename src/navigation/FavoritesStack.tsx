@@ -1,17 +1,17 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import ExploreScreen from '../screens/ExploreScreen';
+import FavoritesScreen from '../screens/FavoritesScreen';
 import MovieDetailsScreen from '../screens/MovieDetailsScreen';
 
 const Stack = createStackNavigator();
 
-const HomeStack = () => {
+const FavoritesStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Explore" component={ExploreScreen} />
+      <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Details" component={MovieDetailsScreen} />
     </Stack.Navigator>
   );
 };
 
-export default HomeStack;
+export default FavoritesStack;

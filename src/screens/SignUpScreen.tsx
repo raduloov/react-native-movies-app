@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from '@firebase/auth';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Button, Dialog, Paragraph, Portal, TextInput } from 'react-native-paper';
-import { auth } from '../firebase/firebase-config';
+import { auth, db } from '../firebase/firebase-config';
+import { AuthStackNavProps } from '../types/AuthParamList';
+import { setDoc, doc } from 'firebase/firestore';
 
-const SignUpScreen = ({ navigation }) => {
+const SignUpScreen = ({ navigation }: AuthStackNavProps<'SignUp'>) => {
   const [enteredEmail, setEnteredEmail] = useState<string>('');
+  const [enteredName, setEnteredName] = useState<string>('');
   const [enteredPassword, setEnteredPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -13,25 +16,39 @@ const SignUpScreen = ({ navigation }) => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const signUp = async () => {
-    if (enteredPassword !== confirmPassword) {
-      setError('Please make sure your passwords match.');
-      return;
-    }
-
     if (error !== '') {
       setError('');
     }
 
+    if (enteredPassword !== confirmPassword) {
+      setError('Please make sure your passwords match.');
+      setShowError(true);
+      return;
+    }
+
+    if (enteredName.trim().length === 0) {
+      setError('Please enter your name.');
+      setShowError(true);
+      return;
+    }
+
     setLoading(true);
+
     try {
-      console.log('click');
+      const newUser = await createUserWithEmailAndPassword(
+        auth,
+        enteredEmail,
+        enteredPassword
+      );
 
-      await createUserWithEmailAndPassword(auth, enteredEmail, enteredPassword);
+      await setDoc(doc(db, 'users', newUser.user.uid), {
+        email: enteredEmail,
+        displayName: enteredName,
+        favorites: []
+      });
+
       setLoading(false);
-      navigation.navigate('Home');
-    } catch (error) {
-      console.log(error);
-
+    } catch (error: any) {
       if (error.code.includes('auth/weak-password')) {
         setError('Password must be at least 6 characters long.');
       } else if (error.code.includes('auth/email-already-in-use')) {
@@ -47,31 +64,35 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {error ? (
-        <Portal>
-          <Dialog visible={showError} onDismiss={() => setShowError(false)}>
-            <Dialog.Title>Error</Dialog.Title>
-            <Dialog.Content>
-              <Paragraph>{error}</Paragraph>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={() => setShowError(false)}>Okay</Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-      ) : null}
+      <Portal>
+        <Dialog visible={showError} onDismiss={() => setShowError(false)}>
+          <Dialog.Title>Error</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>{error}</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowError(false)}>Okay</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
       <View style={styles.textContainer}>
         <Text style={{ fontSize: 35 }}>Create a</Text>
         <Text style={styles.text}>Movies App</Text>
         <Text style={{ fontSize: 35 }}>account</Text>
       </View>
       <View style={styles.loginForm}>
-        <View style={{ height: 210 }}>
+        <View style={{ height: 270 }}>
           <TextInput
             label="Email"
             mode="outlined"
             onChangeText={text => setEnteredEmail(text)}
             value={enteredEmail}
+          />
+          <TextInput
+            label="Full Name"
+            mode="outlined"
+            onChangeText={text => setEnteredName(text)}
+            value={enteredName}
           />
           <TextInput
             label="Password"

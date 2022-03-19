@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface MovieCardProps {
   title: string;
-  imageUrl: string;
+  imageUrl: string | null;
   voteAverage: number;
   voteCount: number;
   onShowMovieDetails: () => void;

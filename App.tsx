@@ -7,6 +7,8 @@ import { onAuthStateChanged } from '@firebase/auth';
 import { auth } from './src/firebase/firebase-config';
 import AuthStack from './src/navigation/AuthStack';
 import AppTabs from './src/navigation/AppTabs';
+import { Provider } from 'react-redux';
+import store from './src/store';
 
 const App = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -31,12 +33,14 @@ const App = () => {
   }
 
   return (
-    <PaperProvider>
-      <StatusBar barStyle="default" />
-      <NavigationContainer>
-        {isLoggedIn ? <AppTabs /> : <AuthStack />}
-      </NavigationContainer>
-    </PaperProvider>
+    <Provider store={store}>
+      <PaperProvider>
+        <StatusBar barStyle="default" />
+        <NavigationContainer>
+          {isLoggedIn ? <AppTabs /> : <AuthStack />}
+        </NavigationContainer>
+      </PaperProvider>
+    </Provider>
   );
 };
 

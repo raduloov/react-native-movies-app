@@ -1,6 +1,6 @@
 import { signOut } from '@firebase/auth';
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import { View, StyleSheet, SafeAreaView } from 'react-native';
 import { Button } from 'react-native-paper';
 import { auth } from '../firebase/firebase-config';
 

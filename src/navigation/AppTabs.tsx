@@ -1,10 +1,10 @@
 import React from 'react';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-// import HomeScreen from '../screens/ExploreScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import HomeStack from './HomeStack';
+import FavoritesStack from './FavoritesStack';
 
 const Tabs = createMaterialBottomTabNavigator();
 
@@ -29,7 +29,7 @@ const AppTabs = () => {
       />
       <Tabs.Screen
         name="Favorites"
-        component={HomeStack}
+        component={FavoritesStack}
         options={{
           tabBarLabel: 'Favorites',
           tabBarColor: 'red',

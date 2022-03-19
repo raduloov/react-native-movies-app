@@ -3,8 +3,9 @@ import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { signInWithEmailAndPassword } from '@firebase/auth';
 import { Button, Dialog, Paragraph, Portal, TextInput } from 'react-native-paper';
 import { auth } from '../firebase/firebase-config';
+import { AuthStackNavProps } from '../types/AuthParamList';
 
-const LoginScreen = ({ navigation }) => {
+const LoginScreen = ({ navigation }: AuthStackNavProps<'Login'>) => {
   const [enteredEmail, setEnteredEmail] = useState<string>('');
   const [enteredPassword, setEnteredPassword] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -37,19 +38,17 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {error ? (
-        <Portal>
-          <Dialog visible={showError} onDismiss={() => setShowError(false)}>
-            <Dialog.Title>Error</Dialog.Title>
-            <Dialog.Content>
-              <Paragraph>{error}</Paragraph>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={() => setShowError(false)}>Okay</Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-      ) : null}
+      <Portal>
+        <Dialog visible={showError} onDismiss={() => setShowError(false)}>
+          <Dialog.Title>Error</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph>{error}</Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowError(false)}>Okay</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
       <View style={styles.textContainer}>
         <Text style={{ fontSize: 35 }}>Welcome to</Text>
         <Text style={styles.text}>Movies App</Text>
