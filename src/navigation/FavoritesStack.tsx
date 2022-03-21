@@ -7,7 +7,11 @@ const Stack = createStackNavigator();
 
 const FavoritesStack = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false
+      }}
+    >
       <Stack.Screen name="Favorites" component={FavoritesScreen} />
       <Stack.Screen name="Details" component={MovieDetailsScreen} />
     </Stack.Navigator>

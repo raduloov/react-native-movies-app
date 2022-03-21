@@ -5,7 +5,8 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  SafeAreaView
 } from 'react-native';
 import moment from 'moment';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -14,7 +15,7 @@ import { baseUrl, key } from '../api/themoviesdb';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome5';
 import { ExploreStackNavProps } from '../types/ExploreParamList';
 import VideoPlayer from '../components/VideoPlayer';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
 import { useDispatch, useSelector } from 'react-redux';
 import { apiActions } from '../store/apiSlice';
@@ -33,10 +34,11 @@ interface VideoProps {
 }
 
 const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
-  const [data, setData] = useState<any>({});
+  const [movieInfo, setMovieInfo] = useState<any>({});
   const [trailer, setTrailer] = useState<string>('');
   const [playTrailer, setPlayTrailer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [buttonLoading, setButtonLoading] = useState<boolean>(false);
 
   const { movieId } = route.params;
   const { currentUser } = auth;
@@ -46,8 +48,6 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
   const [isFavorite, setIsFavorite] = useState<boolean>(
     !!favorites.find((movie: any) => movie.movieId === movieId)
   );
-
-  console.log('state favs:', favorites);
 
   const formatDate = (date: string) => {
     const dateString = date.replace(/-/g, '');
@@ -65,10 +65,14 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
         const videosRes = await fetch(`${baseUrl}/movie/${movieId}/videos${key}`);
         const videosData = await videosRes.json();
 
-        setData({
-          movie: movieData,
-          videos: videosData.results
-        });
+        setMovieInfo(movieData);
+
+        setTrailer(
+          videosData.results.find(
+            (video: VideoProps) =>
+              video.site === 'YouTube' && video.type === 'Trailer'
+          ).key
+        );
 
         setLoading(false);
       } catch (error) {
@@ -78,23 +82,17 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
     };
 
     getMovie();
-    if (data.videos) {
-      const { key } = data.videos.find(
-        (video: VideoProps) => video.site === 'YouTube' && video.type === 'Trailer'
-      );
-      setTrailer(key);
-    }
-  }, []);
+  }, [trailer]);
 
   const addToFavorites = async () => {
-    // setLoading(true);
+    setButtonLoading(true);
     try {
       const movieData = {
         movieId,
-        title: data.movie.title,
-        imageUrl: data.movie.poster_path,
-        voteAverage: data.movie.vote_average,
-        voteCount: data.movie.vote_count
+        title: movieInfo.title,
+        imageUrl: movieInfo.poster_path,
+        voteAverage: movieInfo.vote_average,
+        voteCount: movieInfo.vote_count
       };
 
       if (currentUser) {
@@ -105,15 +103,16 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
         setIsFavorite(wasFavorite => !wasFavorite);
       }
 
-      // setLoading(false);
+      setButtonLoading(false);
     } catch (error) {
       console.log('💥', error);
-      // setLoading(false);
+      setButtonLoading(false);
       throw error;
     }
   };
 
   const removeFromFavorites = async () => {
+    setButtonLoading(true);
     try {
       if (currentUser) {
         await updateDoc(doc(db, 'users', currentUser?.uid), {
@@ -121,97 +120,105 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
         });
         dispatch(apiActions.removeFromFavorites(movieId));
         setIsFavorite(wasFavorite => !wasFavorite);
+        setButtonLoading(false);
       }
     } catch (error) {
+      setButtonLoading(false);
       console.log(error);
       throw error;
     }
   };
 
   return (
-    <ScrollView>
-      {loading ? (
-        <ActivityIndicator />
-      ) : (
-        <View style={styles.detailsContainer}>
-          <TouchableOpacity onPress={() => setPlayTrailer(true)}>
-            {!playTrailer ? (
-              <>
-                <Image
-                  source={{
-                    uri: `https://image.tmdb.org/t/p/w500${data.movie.backdrop_path}`
-                  }}
-                  style={{ height: 300 }}
-                />
-                <View style={styles.playButton}>
-                  <FontAwesomeIcon name="play-circle" color="#fff" size={60} />
-                </View>
-              </>
-            ) : (
-              <VideoPlayer videoId={trailer} />
-            )}
-          </TouchableOpacity>
+    <SafeAreaView>
+      <ScrollView>
+        {loading ? (
+          <ActivityIndicator />
+        ) : (
+          <View style={styles.detailsContainer}>
+            <TouchableOpacity onPress={() => setPlayTrailer(true)}>
+              {!playTrailer ? (
+                <>
+                  <Image
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500${movieInfo.backdrop_path}`
+                    }}
+                    style={{ height: 300 }}
+                  />
+                  <View style={styles.playButton}>
+                    <FontAwesomeIcon name="play-circle" color="#fff" size={60} />
+                  </View>
+                </>
+              ) : (
+                <VideoPlayer videoId={trailer} />
+              )}
+            </TouchableOpacity>
 
-          <View style={styles.titleContainer}>
-            <Text style={{ fontSize: 25, textAlign: 'center', color: '#000' }}>
-              {data.movie.title}
-            </Text>
-            <Text>{formatDate(data.movie.release_date)}</Text>
-          </View>
-          {!isFavorite ? (
-            <TouchableOpacity onPress={addToFavorites}>
-              <Button loading={loading}>
-                Add to Favorites <FontAwesomeIcon name="heart" size={15} />
-              </Button>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={removeFromFavorites}>
-              <Button loading={loading}>
-                Remove from Favorites{' '}
-                <FontAwesomeIcon name="heart-broken" size={15} />
-              </Button>
-            </TouchableOpacity>
-          )}
-          <View style={styles.container}>
-            <Text style={styles.head}>Genre</Text>
-            <View style={{ flexDirection: 'row' }}>
+            <View style={styles.titleContainer}>
+              <Text style={{ fontSize: 25, textAlign: 'center', color: '#000' }}>
+                {movieInfo.title}
+              </Text>
+              <Text>{formatDate(movieInfo.release_date)}</Text>
+            </View>
+            <View style={styles.buttonContainer}>
+              {buttonLoading && <ActivityIndicator size="small" />}
+              {!buttonLoading && !isFavorite && (
+                <TouchableOpacity onPress={addToFavorites}>
+                  <Button>
+                    Add to Favorites <FontAwesomeIcon name="heart" size={15} />
+                  </Button>
+                </TouchableOpacity>
+              )}
+              {!buttonLoading && isFavorite && (
+                <TouchableOpacity onPress={removeFromFavorites}>
+                  <Button>
+                    Remove from Favorites{' '}
+                    <FontAwesomeIcon name="heart-broken" size={15} />
+                  </Button>
+                </TouchableOpacity>
+              )}
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.head}>Genre</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ color: '#000' }}>
+                  {movieInfo.genres
+                    .map((movie: { id: number; name: string }) => `${movie.name}`)
+                    .join(', ')}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.head}>Overview</Text>
+              <Text style={{ color: '#000' }}>{movieInfo.overview}</Text>
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.head}>Production</Text>
               <Text style={{ color: '#000' }}>
-                {data.movie.genres
-                  .map((movie: { id: number; name: string }) => `${movie.name}`)
-                  .join(', ')}
+                <Text>
+                  {movieInfo.production_companies
+                    .map(
+                      (company: {
+                        id: number;
+                        logo_path: string | null;
+                        name: string;
+                        origin_country: string;
+                      }) => `${company.name}`
+                    )
+                    .join(', ')}
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.head}>Budget / Revenue</Text>
+              <Text style={{ color: '#000' }}>
+                ${movieInfo.budget} / ${movieInfo.revenue}
               </Text>
             </View>
           </View>
-          <View style={styles.container}>
-            <Text style={styles.head}>Overview</Text>
-            <Text style={{ color: '#000' }}>{data.movie.overview}</Text>
-          </View>
-          <View style={styles.container}>
-            <Text style={styles.head}>Production</Text>
-            <Text style={{ color: '#000' }}>
-              <Text>
-                {data.movie.production_companies
-                  .map(
-                    (company: {
-                      id: number;
-                      logo_path: string | null;
-                      name: string;
-                      origin_country: string;
-                    }) => `${company.name}`
-                  )
-                  .join(', ')}
-              </Text>
-            </Text>
-          </View>
-          <View style={styles.container}>
-            <Text style={styles.head}>Budget / Revenue</Text>
-            <Text style={{ color: '#000' }}>
-              ${data.movie.budget} / ${data.movie.revenue}
-            </Text>
-          </View>
-        </View>
-      )}
-    </ScrollView>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -243,6 +250,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonContainer: {
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center'
   }

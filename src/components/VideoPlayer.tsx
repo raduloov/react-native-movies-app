@@ -1,6 +1,5 @@
 import React from 'react';
-import YoutubePlayer from 'react-native-youtube-iframe';
-import { View, StyleSheet } from 'react-native';
+import WebView from 'react-native-webview';
 
 interface VideoPlayerProps {
   videoId: string;
@@ -8,14 +7,18 @@ interface VideoPlayerProps {
 
 const VideoPlayer = ({ videoId }: VideoPlayerProps) => {
   return (
-    <View style={styles.container}>
-      <YoutubePlayer height={300} play={true} videoId={videoId} />
-    </View>
+    <WebView
+      automaticallyAdjustContentInsets={false}
+      mediaPlaybackRequiresUserAction={true}
+      style={{
+        height: 300,
+        width: '100%',
+        alignSelf: 'center',
+        alignContent: 'center'
+      }}
+      source={{ uri: `https://www.youtube.com/embed/${videoId}?rel=0` }}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {}
-});
 
 export default VideoPlayer;

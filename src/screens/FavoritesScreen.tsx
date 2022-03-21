@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import { useSelector } from 'react-redux';
 import FavoriteMovieCard from '../components/FavoriteMovieCard';
 import { FavoritesStackNavProps } from '../types/FavoritesParamList';
 
@@ -17,7 +17,7 @@ const FavoritesScreen = ({ navigation }: FavoritesStackNavProps<'Favorites'>) =>
           color: '#000'
         }}
       >
-        Favourites
+        Favorites
       </Text>
       <FlatList
         data={favorites}
