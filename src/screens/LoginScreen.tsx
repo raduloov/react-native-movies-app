@@ -21,7 +21,7 @@ const LoginScreen = ({ navigation }: AuthStackNavProps<'Login'>) => {
 
     try {
       await signInWithEmailAndPassword(auth, enteredEmail, enteredPassword);
-      setLoading(false);
+      // setLoading(false);
     } catch (error: any) {
       if (error.code.includes('auth/invalid-email')) {
         setError('Invalid email.');
