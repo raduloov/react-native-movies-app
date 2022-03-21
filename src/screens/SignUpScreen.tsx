@@ -44,7 +44,8 @@ const SignUpScreen = ({ navigation }: AuthStackNavProps<'SignUp'>) => {
       await setDoc(doc(db, 'users', newUser.user.uid), {
         email: enteredEmail,
         displayName: enteredName,
-        favorites: []
+        favorites: [],
+        favoriteCount: 0
       });
 
       setLoading(false);

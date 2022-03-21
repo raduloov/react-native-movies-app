@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
+import { ProgressBar } from 'react-native-paper';
 import { useSelector } from 'react-redux';
 import FavoriteMovieCard from '../components/FavoriteMovieCard';
 import { FavoritesStackNavProps } from '../types/FavoritesParamList';
