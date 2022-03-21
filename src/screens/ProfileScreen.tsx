@@ -35,10 +35,11 @@ const ProfileScreen = () => {
           const userSnap = (await getDoc(userRef)).data();
           const user = userSnap;
 
+          setUserInfo(user);
+
           const imageRef = ref(storage, `images/${currentUser.uid}`);
           const imageUrl = await getDownloadURL(imageRef);
 
-          setUserInfo(user);
           setImage(imageUrl);
           setLoading(false);
         }
@@ -50,7 +51,7 @@ const ProfileScreen = () => {
 
     getUserInfo();
     setLoading(false);
-  }, []);
+  }, [currentUser]);
 
   const logoutHandler = async () => {
     await signOut(auth);
