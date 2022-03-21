@@ -4,7 +4,7 @@
 
 ## About
 
-This is my first mobile application [iOS + Android]. Did it as an exercise for my React Native skills.
+This is my first mobile application. Did it as an exercise for my React Native skills.
 
 ## Tech Stack
 
@@ -13,3 +13,6 @@ This is my first mobile application [iOS + Android]. Did it as an exercise for m
 - Redux Toolkit
 
 ## Key Features
+
+- Create an account or log in
+  ![Alt Text](https://tenor.com/view/gif-25176637)

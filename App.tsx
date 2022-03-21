@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useState } from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { LogBox, StatusBar, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, Provider as PaperProvider } from 'react-native-paper';
 import { onAuthStateChanged } from '@firebase/auth';
@@ -13,6 +13,8 @@ import store from './src/store';
 const App = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  LogBox.ignoreAllLogs();
 
   onAuthStateChanged(auth, user => {
     if (user) {
