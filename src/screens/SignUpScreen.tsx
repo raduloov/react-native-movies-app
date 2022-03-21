@@ -45,7 +45,7 @@ const SignUpScreen = ({ navigation }: AuthStackNavProps<'SignUp'>) => {
         email: enteredEmail,
         displayName: enteredName,
         favorites: [],
-        favoriteCount: 0
+        favoritesCount: 0
       });
 
       setLoading(false);

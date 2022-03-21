@@ -16,6 +16,7 @@ import { auth, db, storage } from '../firebase/firebase-config';
 import Icon from 'react-native-vector-icons/Entypo';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
+import { useSelector } from 'react-redux';
 
 const ProfileScreen = () => {
   const [userInfo, setUserInfo] = useState<any>({});
@@ -23,6 +24,7 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const { currentUser } = auth;
+  const { favorites } = useSelector((state: any) => state.api);
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -80,9 +82,8 @@ const ProfileScreen = () => {
           setLoading(false);
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       setLoading(false);
-      Alert.alert(error.message);
     }
   };
 
@@ -93,31 +94,45 @@ const ProfileScreen = () => {
           {userInfo.displayName}
         </Text>
       </View>
-      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <View style={styles.profileImageContainer}>
-          {loading && (
-            <View style={styles.imageLoading}>
-              <ActivityIndicator size="large" />
-            </View>
-          )}
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              style={{ height: '100%', width: '100%' }}
-            />
-          ) : (
-            <Icon name="user" size={200} />
-          )}
+      <View
+        style={{
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          height: '100%',
+          paddingBottom: 200
+        }}
+      >
+        <View>
+          <View style={styles.profileImageContainer}>
+            {loading && (
+              <View style={styles.imageLoading}>
+                <ActivityIndicator size="large" />
+              </View>
+            )}
+            {image ? (
+              <Image
+                source={{ uri: image }}
+                style={{ height: '100%', width: '100%', borderRadius: 10 }}
+              />
+            ) : (
+              <Icon name="user" size={200} />
+            )}
+          </View>
+          <TouchableOpacity onPress={selectImageHandler}>
+            <Button>Edit Image</Button>
+          </TouchableOpacity>
+          <View
+            style={{ justifyContent: 'center', alignItems: 'center', marginTop: 50 }}
+          >
+            <Text style={{ fontSize: 20 }}>
+              Your favorite movies: {favorites.length}
+            </Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={selectImageHandler}>
-          <Button>Edit Image</Button>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={uploadImageHandler}>
-          <Button>Save</Button>
-        </TouchableOpacity>
-      </View>
-      <View>
-        <Button onPress={logoutHandler}>Logout</Button>
+        <View>
+          <Button onPress={uploadImageHandler}>Save</Button>
+          <Button onPress={logoutHandler}>Logout</Button>
+        </View>
       </View>
     </SafeAreaView>
   );
