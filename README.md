@@ -15,4 +15,4 @@ This is my first mobile application. Did it as an exercise for my React Native s
 ## Key Features
 
 - Create an account or log in
-  ![Alt Text](https://giphy.com/gifs/mf4Y8QUAVQk1HWC5Kb)
+  ![Alt Text](https://media.giphy.com/media/mf4Y8QUAVQk1HWC5Kb/giphy.gif)
