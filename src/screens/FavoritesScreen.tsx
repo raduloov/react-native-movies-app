@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { useSelector } from 'react-redux';
+import { RootStateOrAny, useSelector } from 'react-redux';
 import FavoriteMovieCard from '../components/FavoriteMovieCard';
 import { FavoritesStackNavProps } from '../types/FavoritesParamList';
 
 const FavoritesScreen = ({ navigation }: FavoritesStackNavProps<'Favorites'>) => {
-  const { favorites } = useSelector((state: any) => state.api);
+  const { favorites } = useSelector((state: RootStateOrAny) => state.api);
 
   return (
     <SafeAreaView style={styles.container}>

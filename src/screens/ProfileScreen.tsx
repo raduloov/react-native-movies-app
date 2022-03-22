@@ -1,6 +1,6 @@
-import { signOut } from '@firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
+import { signOut } from '@firebase/auth';
+import { doc, DocumentData, getDoc } from 'firebase/firestore';
 import {
   View,
   StyleSheet,
@@ -16,15 +16,23 @@ import { auth, db, storage } from '../firebase/firebase-config';
 import Icon from 'react-native-vector-icons/Entypo';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { useSelector } from 'react-redux';
+import { RootStateOrAny, useSelector } from 'react-redux';
+import { FavMovieProps } from '../types/types';
+
+interface UserInfoProps {
+  displayName: string;
+  email: string;
+  favorites: FavMovieProps[];
+}
 
 const ProfileScreen = () => {
-  const [userInfo, setUserInfo] = useState<any>({});
-  const [image, setImage] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfoProps | DocumentData>();
+  const [image, setImage] = useState<string | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
 
   const { currentUser } = auth;
-  const { favorites } = useSelector((state: any) => state.api);
+
+  const { favorites } = useSelector((state: RootStateOrAny) => state.api);
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -78,7 +86,7 @@ const ProfileScreen = () => {
         const img = await fetch(image);
         const bytes = await img.blob();
 
-        uploadBytes(imageRef, bytes).then(snapshot => {
+        uploadBytes(imageRef, bytes).then(() => {
           Alert.alert('Image updated successfully!');
           setLoading(false);
         });
@@ -92,7 +100,7 @@ const ProfileScreen = () => {
     <SafeAreaView>
       <View style={styles.header}>
         <Text style={{ fontSize: 25, fontWeight: 'bold' }}>
-          {userInfo.displayName}
+          {userInfo && userInfo.displayName}
         </Text>
       </View>
       <View

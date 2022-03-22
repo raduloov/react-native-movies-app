@@ -18,28 +18,11 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
 import { auth, db } from '../firebase/firebase-config';
 import { apiActions } from '../store/apiSlice';
-
-interface MovieProps {
-  poster_path: string | null;
-  adult: boolean;
-  overview: string;
-  release_date: string;
-  genre_ids: number[];
-  id: number;
-  original_title: string;
-  original_language: string;
-  title: string;
-  backdrop_path: string | null;
-  popularity: number;
-  vote_count: number;
-  video: boolean;
-  vote_average: number;
-}
+import { MovieInfoProps } from '../types/types';
 
 const ExploreScreen = ({ navigation }: ExploreStackNavProps<'Explore'>) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [movies, setMovies] = useState<MovieProps[]>([]);
-  const [favorites, setFavorites] = useState<any>([]);
+  const [movies, setMovies] = useState<MovieInfoProps[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Popular');
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -53,9 +36,7 @@ const ExploreScreen = ({ navigation }: ExploreStackNavProps<'Explore'>) => {
         const favsRef = doc(db, 'users', currentUser?.uid);
         const favsSnap = (await getDoc(favsRef)).data();
         const favs = favsSnap?.favorites;
-        console.log(favs);
 
-        setFavorites(favs);
         dispatch(apiActions.setFavorites(favs));
       }
     };

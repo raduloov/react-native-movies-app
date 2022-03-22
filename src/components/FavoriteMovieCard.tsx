@@ -3,9 +3,10 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-paper';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import { useDispatch, useSelector } from 'react-redux';
+import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { auth, db } from '../firebase/firebase-config';
 import { apiActions } from '../store/apiSlice';
+import { FavMovieProps } from '../types/types';
 
 interface FavoriteMovieCardProps {
   movieId: number;
@@ -25,14 +26,16 @@ const FavoriteMovieCard = ({
   onShowMovieDetails
 }: FavoriteMovieCardProps) => {
   const { currentUser } = auth;
-  const { favorites } = useSelector((state: any) => state.api);
+  const { favorites } = useSelector((state: RootStateOrAny) => state.api);
   const dispatch = useDispatch();
 
   const removeFromFavorites = async () => {
     try {
       if (currentUser) {
         await updateDoc(doc(db, 'users', currentUser?.uid), {
-          favorites: favorites.filter((movie: any) => movie.movieId !== movieId)
+          favorites: favorites.filter(
+            (movie: FavMovieProps) => movie.movieId !== movieId
+          )
         });
         dispatch(apiActions.removeFromFavorites(movieId));
       }
