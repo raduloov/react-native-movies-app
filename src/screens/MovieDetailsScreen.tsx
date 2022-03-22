@@ -40,15 +40,20 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
   const [playTrailer, setPlayTrailer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [buttonLoading, setButtonLoading] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
   const { movieId } = route.params;
   const { currentUser } = auth;
 
   const dispatch = useDispatch();
+
   const { favorites } = useSelector((state: RootStateOrAny) => state.api);
-  const [isFavorite, setIsFavorite] = useState<boolean>(
-    !!favorites.find((movie: FavMovieProps) => movie.movieId === movieId)
-  );
+
+  useEffect(() => {
+    setIsFavorite(
+      !!favorites.find((movie: FavMovieProps) => movie.movieId === movieId)
+    );
+  }, [favorites]);
 
   const formatDate = (date?: string | null) => {
     if (date) {
@@ -104,7 +109,6 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
             favorites: [...favorites, movieData]
           });
           dispatch(apiActions.addFavorite(movieData));
-          setIsFavorite(wasFavorite => !wasFavorite);
         }
       }
 
@@ -126,7 +130,6 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
           )
         });
         dispatch(apiActions.removeFromFavorites(movieId));
-        setIsFavorite(wasFavorite => !wasFavorite);
         setButtonLoading(false);
       }
     } catch (error) {
