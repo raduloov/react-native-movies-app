@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { FavMovieProps } from '../types/types';
 
 interface StateProps {
-  favorites: any[];
+  favorites: FavMovieProps[];
 }
 
 const apiSlice = createSlice({
@@ -16,7 +17,7 @@ const apiSlice = createSlice({
     addFavorite(state, { payload }) {
       if (state.favorites) {
         const existingMovie = state.favorites.find(
-          (movie: any) => movie.movieId === payload.movieId
+          (movie: FavMovieProps) => movie.movieId === payload.movieId
         );
 
         if (!existingMovie) {
@@ -27,7 +28,7 @@ const apiSlice = createSlice({
     removeFromFavorites(state, { payload }) {
       if (state.favorites) {
         state.favorites = state.favorites.filter(
-          (movie: any) => movie.movieId !== payload
+          (movie: FavMovieProps) => movie.movieId !== payload
         );
       }
     }

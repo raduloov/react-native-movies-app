@@ -9,16 +9,17 @@ import {
   SafeAreaView
 } from 'react-native';
 import moment from 'moment';
+import VideoPlayer from '../components/VideoPlayer';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Button } from 'react-native-paper';
 import { baseUrl, key } from '../api/themoviesdb';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome5';
 import { ExploreStackNavProps } from '../types/ExploreParamList';
-import VideoPlayer from '../components/VideoPlayer';
 import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase/firebase-config';
-import { useDispatch, useSelector } from 'react-redux';
+import { RootStateOrAny, useDispatch, useSelector } from 'react-redux';
 import { apiActions } from '../store/apiSlice';
+import { FavMovieProps, MovieInfoProps } from '../types/types';
 
 interface VideoProps {
   id: string;
@@ -34,7 +35,7 @@ interface VideoProps {
 }
 
 const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
-  const [movieInfo, setMovieInfo] = useState<any>({});
+  const [movieInfo, setMovieInfo] = useState<MovieInfoProps>();
   const [trailer, setTrailer] = useState<string>('');
   const [playTrailer, setPlayTrailer] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -44,15 +45,17 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
   const { currentUser } = auth;
 
   const dispatch = useDispatch();
-  const { favorites } = useSelector((state: any) => state.api);
+  const { favorites } = useSelector((state: RootStateOrAny) => state.api);
   const [isFavorite, setIsFavorite] = useState<boolean>(
-    !!favorites.find((movie: any) => movie.movieId === movieId)
+    !!favorites.find((movie: FavMovieProps) => movie.movieId === movieId)
   );
 
-  const formatDate = (date: string) => {
-    const dateString = date.replace(/-/g, '');
-    const formattedDate = moment(dateString, 'YYYYMMDD').format('MMM Do YYYY');
-    return formattedDate;
+  const formatDate = (date?: string | null) => {
+    if (date) {
+      const dateString = date.replace(/-/g, '');
+      const formattedDate = moment(dateString, 'YYYYMMDD').format('MMM Do YYYY');
+      return formattedDate;
+    }
   };
 
   useEffect(() => {
@@ -87,20 +90,22 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
   const addToFavorites = async () => {
     setButtonLoading(true);
     try {
-      const movieData = {
-        movieId,
-        title: movieInfo.title,
-        imageUrl: movieInfo.poster_path,
-        voteAverage: movieInfo.vote_average,
-        voteCount: movieInfo.vote_count
-      };
+      if (movieInfo) {
+        const movieData = {
+          movieId,
+          title: movieInfo.title,
+          imageUrl: movieInfo.poster_path,
+          voteAverage: movieInfo.vote_average,
+          voteCount: movieInfo.vote_count
+        };
 
-      if (currentUser) {
-        await updateDoc(doc(db, 'users', currentUser?.uid), {
-          favorites: [...favorites, movieData]
-        });
-        dispatch(apiActions.addFavorite(movieData));
-        setIsFavorite(wasFavorite => !wasFavorite);
+        if (currentUser) {
+          await updateDoc(doc(db, 'users', currentUser?.uid), {
+            favorites: [...favorites, movieData]
+          });
+          dispatch(apiActions.addFavorite(movieData));
+          setIsFavorite(wasFavorite => !wasFavorite);
+        }
       }
 
       setButtonLoading(false);
@@ -116,7 +121,9 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
     try {
       if (currentUser) {
         await updateDoc(doc(db, 'users', currentUser?.uid), {
-          favorites: favorites.filter((movie: any) => movie.movieId !== movieId)
+          favorites: favorites.filter(
+            (movie: FavMovieProps) => movie.movieId !== movieId
+          )
         });
         dispatch(apiActions.removeFromFavorites(movieId));
         setIsFavorite(wasFavorite => !wasFavorite);
@@ -141,7 +148,9 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
                 <>
                   <Image
                     source={{
-                      uri: `https://image.tmdb.org/t/p/w500${movieInfo.backdrop_path}`
+                      uri: `https://image.tmdb.org/t/p/w500${
+                        movieInfo && movieInfo.backdrop_path
+                      }`
                     }}
                     style={{ height: 300 }}
                   />
@@ -156,9 +165,9 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
 
             <View style={styles.titleContainer}>
               <Text style={{ fontSize: 25, textAlign: 'center', color: '#000' }}>
-                {movieInfo.title}
+                {movieInfo && movieInfo.title}
               </Text>
-              <Text>{formatDate(movieInfo.release_date)}</Text>
+              <Text>{formatDate(movieInfo?.release_date)}</Text>
             </View>
             <View style={styles.buttonContainer}>
               {buttonLoading && <ActivityIndicator size="small" />}
@@ -182,37 +191,41 @@ const MovieDetailsScreen = ({ route }: ExploreStackNavProps<'Details'>) => {
               <Text style={styles.head}>Genre</Text>
               <View style={{ flexDirection: 'row' }}>
                 <Text style={{ color: '#000' }}>
-                  {movieInfo.genres
-                    .map((movie: { id: number; name: string }) => `${movie.name}`)
-                    .join(', ')}
+                  {movieInfo &&
+                    movieInfo.genres
+                      .map((movie: { id: number; name: string }) => `${movie.name}`)
+                      .join(', ')}
                 </Text>
               </View>
             </View>
             <View style={styles.container}>
               <Text style={styles.head}>Overview</Text>
-              <Text style={{ color: '#000' }}>{movieInfo.overview}</Text>
+              <Text style={{ color: '#000' }}>
+                {movieInfo && movieInfo.overview}
+              </Text>
             </View>
             <View style={styles.container}>
               <Text style={styles.head}>Production</Text>
               <Text style={{ color: '#000' }}>
                 <Text>
-                  {movieInfo.production_companies
-                    .map(
-                      (company: {
-                        id: number;
-                        logo_path: string | null;
-                        name: string;
-                        origin_country: string;
-                      }) => `${company.name}`
-                    )
-                    .join(', ')}
+                  {movieInfo &&
+                    movieInfo.production_companies
+                      .map(
+                        (company: {
+                          id: number;
+                          logo_path: string | null;
+                          name: string;
+                          origin_country: string;
+                        }) => `${company.name}`
+                      )
+                      .join(', ')}
                 </Text>
               </Text>
             </View>
             <View style={styles.container}>
               <Text style={styles.head}>Budget / Revenue</Text>
               <Text style={{ color: '#000' }}>
-                ${movieInfo.budget} / ${movieInfo.revenue}
+                ${movieInfo && movieInfo.budget} / ${movieInfo && movieInfo.revenue}
               </Text>
             </View>
           </View>
