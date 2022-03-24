@@ -21,7 +21,7 @@ This is my first mobile application. Did it as an exercise for my React Native s
 - See movie details and trailer <br />
   ![Create an account or log in](https://media.giphy.com/media/qnc2vv2QYJ6GxAtgEF/giphy.gif)
 - Add to favorites and the favorites section <br />
-  ![Create an account or log in](https://media.giphy.com/media/o8mjeKRENjs6yGg2v4/giphy.gif)
+  ![Create an account or log in](https://media.giphy.com/media/470OMYTcOn4nzFKQAH/giphy.gif)
 - Upload a profile picture and the profile section <br />
   ![Create an account or log in](https://media.giphy.com/media/TDW8Ok91a4aOoKF86w/giphy.gif)
 
@@ -34,4 +34,5 @@ If you would like to try it out for yourself, follow these steps:
 - Run `yarn install` or `npm install` in your terminal
 - You would need an Android emulator which you can see how to set up [here](https://developer.android.com/studio/run/managing-avds)
 - If you are using a Mac, you can download Xcode and set up an iOS simulator
+- For iOS only, run `cd ios && pod install`
 - Run `yarn run ios`, `yarn run android` or `npm run ios`, `npm run android` respectively
