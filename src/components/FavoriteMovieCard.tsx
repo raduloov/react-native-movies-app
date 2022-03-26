@@ -71,7 +71,7 @@ const FavoriteMovieCard = ({
           )
         });
         dispatch(apiActions.removeFromFavorites(movieId));
-        Alert.alert('Removed from favorites.');
+        Alert.alert(title, 'Removed from favorites.');
         swipableRef.current.close();
       }
     } catch (error) {

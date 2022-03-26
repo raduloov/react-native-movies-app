@@ -168,6 +168,7 @@ const ExploreScreen = ({ navigation }: ExploreStackNavProps<'Explore'>) => {
                   movieId: item.id
                 });
               }}
+              movieId={item.id}
               title={item.title}
               imageUrl={item.poster_path}
               voteAverage={item.vote_average}
